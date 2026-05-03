@@ -1,0 +1,1 @@
+export { SpedyEmissor } from './SpedyEmissor';

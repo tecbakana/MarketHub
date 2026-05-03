@@ -1,0 +1,11 @@
+{
+  "name": "@markethub/core",
+  "version": "1.0.0",
+  "description": "Contratos compartilhados — interfaces e DTOs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "license": "ISC"
+}

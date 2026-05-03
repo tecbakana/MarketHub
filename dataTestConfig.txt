@@ -1,0 +1,21 @@
+npx ngrok config add-authtoken 3D6Uf3WGkxsgjUl2L57jxPAfn2y_3oVhcyoT7ZrsdgTHPE5nM
+
+curl -X POST -H "Authorization: Bearer APP_USR-2859385768182439-043022-a81a80d4fbc9131db9396b77d1b6b44f-51583828" -H "Content-Type: application/json" -d "{\"site_id\":\"MLB\"}" https://api.mercadolibre.com/users/test_user
+
+Invoke-RestMethod -Method POST -Uri "https://api.mercadolibre.com/users/test_user" -Headers @{"Authorization"="Bearer APP_USR-2859385768182439-043022-a81a80d4fbc9131db9396b77d1b6b44f-51583828"; "Content-Type"="application/json"} -Body '{"site_id":"MLB"}'
+
+#vendedor
+id          : 3367737416
+email       : test_user_4760218328141319777@testuser.com
+nickname    : TESTUSER4760218328141319777
+site_status : active
+password    : QXBp5vXuZ1
+
+#comprador
+id          : 3370119314
+email       : test_user_6076515315709908977@testuser.com
+nickname    : TESTUSER6076515315709908977
+site_status : active
+password    : 5Q7k82p6l8
+
+Invoke-RestMethod -Method POST -Uri "https://api.mercadolibre.com/orders/test" -Headers @{"Authorization"="Bearer APP_USR-2859385768182439-043022-a81a80d4fbc9131db9396b77d1b6b44f-51583828"; "Content-Type"="application/json"} -Body '{"buyer_id": 3370119314, "item_id": "MLB1", "quantity": 1}'

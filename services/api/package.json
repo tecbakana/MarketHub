@@ -1,0 +1,25 @@
+{
+  "name": "@markethub/api",
+  "version": "1.0.0",
+  "description": "API REST do MarketHub",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@markethub/core": "workspace:*",
+    "@markethub/emitter-spedy": "workspace:*",
+    "express": "^4.18.2",
+    "pg": "^8.12.0",
+    "uuid": "^9.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/pg": "^8.11.6",
+    "@types/uuid": "^9.0.7"
+  },
+  "license": "ISC"
+}

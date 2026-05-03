@@ -1,0 +1,22 @@
+{
+  "name": "@markethub/aggregator",
+  "version": "1.0.0",
+  "description": "Orquestra connectors e publica pedidos no RabbitMQ",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@markethub/core": "workspace:*",
+    "@markethub/connector-mercadolivre": "workspace:*",
+    "@markethub/emitter-spedy": "workspace:*",
+    "amqplib": "^0.10.4",
+    "axios": "^1.15.2"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@types/amqplib": "^0.10.8"
+  }
+}
