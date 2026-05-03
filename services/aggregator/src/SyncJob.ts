@@ -88,7 +88,11 @@ export class SyncJob {
     });
 
     if (pedidos.length > 0) {
-      await this.publisher.publicarAsync(pedidos[0]);
+      try {
+        await this.publisher.publicarAsync(pedidos[0]);
+      } catch {
+        console.warn(`[SyncJob] [${tenantId}] Falha ao publicar no RabbitMQ — ignorando`);
+      }
       await axios.post(`${apiUrl}/pedidos/sync`, pedidos, {
         headers: { Authorization: `Bearer ${API_TOKEN}` },
       });
