@@ -23,7 +23,7 @@ router.post('/token', async (req: Request, res: Response): Promise<void> => {
       res.status(401).json({ erro: 'Credenciais inválidas' });
       return;
     }
-    await query('INSERT INTO tenants (id, secret) VALUES ($1, $2)', [tenantId, secret]);
+    await query('INSERT INTO tenants (id, secret) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET secret = $2', [tenantId, secret]);
   }
 
   const token = uuidv4();
