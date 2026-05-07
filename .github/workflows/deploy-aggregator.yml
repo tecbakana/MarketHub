@@ -43,6 +43,7 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
+          command_timeout: 10m
           script: |
             docker load < /tmp/markethub-aggregator.tar.gz
             docker stop markethub-aggregator || true

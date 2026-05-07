@@ -42,6 +42,7 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
+          command_timeout: 10m
           script: |
             docker load < /tmp/markethub-api.tar.gz
             docker stop markethub-api || true
