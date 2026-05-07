@@ -10,42 +10,45 @@ on:
       - 'packages/core/**'
       - '.github/workflows/deploy-aggregator.yml'
 
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/markethub-aggregator
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build image
-        run: |
-          docker build \
-            -f services/aggregator/Dockerfile \
-            -t markethub-aggregator:latest \
-            .
-
-      - name: Export image
-        run: docker save markethub-aggregator:latest | gzip > markethub-aggregator.img
-
-      - name: Copy image to VM
-        uses: appleboy/scp-action@v0.1.7
+      - name: Login no GHCR
+        uses: docker/login-action@v3
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          source: markethub-aggregator.img
-          target: /tmp/
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Deploy on VM
+      - name: Build e push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: services/aggregator/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE }}:latest
+
+      - name: Deploy na VM
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          command_timeout: 20m
+          command_timeout: 10m
           script: |
-            docker load < /tmp/markethub-aggregator.img
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker pull ${{ env.IMAGE }}:latest
             docker stop markethub-aggregator || true
             docker rm markethub-aggregator || true
             docker run -d \
@@ -54,5 +57,4 @@ jobs:
               --network-alias aggregator \
               --env-file /home/${{ secrets.VM_USER }}/.env.markethub \
               --restart unless-stopped \
-              markethub-aggregator:latest
-            rm /tmp/markethub-aggregator.img
+              ${{ env.IMAGE }}:latest

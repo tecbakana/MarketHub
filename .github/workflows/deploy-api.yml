@@ -9,42 +9,45 @@ on:
       - 'services/emitter-spedy/**'
       - '.github/workflows/deploy-api.yml'
 
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/markethub-api
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build image
-        run: |
-          docker build \
-            -f services/api/Dockerfile \
-            -t markethub-api:latest \
-            .
-
-      - name: Export image
-        run: docker save markethub-api:latest | gzip > markethub-api.img
-
-      - name: Copy image to VM
-        uses: appleboy/scp-action@v0.1.7
+      - name: Login no GHCR
+        uses: docker/login-action@v3
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          source: markethub-api.img
-          target: /tmp/
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Deploy on VM
+      - name: Build e push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: services/api/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE }}:latest
+
+      - name: Deploy na VM
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          command_timeout: 20m
+          command_timeout: 10m
           script: |
-            docker load < /tmp/markethub-api.img
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker pull ${{ env.IMAGE }}:latest
             docker stop markethub-api || true
             docker rm markethub-api || true
             docker run -d \
@@ -54,5 +57,4 @@ jobs:
               -p 4000:4000 \
               --env-file /home/${{ secrets.VM_USER }}/.env.markethub \
               --restart unless-stopped \
-              markethub-api:latest
-            rm /tmp/markethub-api.img
+              ${{ env.IMAGE }}:latest
