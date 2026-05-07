@@ -25,7 +25,7 @@ jobs:
             .
 
       - name: Export image
-        run: docker save markethub-api:latest | gzip > markethub-api.tar.gz
+        run: docker save markethub-api:latest | gzip > markethub-api.img
 
       - name: Copy image to VM
         uses: appleboy/scp-action@v0.1.7
@@ -33,7 +33,7 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          source: markethub-api.tar.gz
+          source: markethub-api.img
           target: /tmp/
 
       - name: Deploy on VM
@@ -42,9 +42,9 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          command_timeout: 10m
+          command_timeout: 20m
           script: |
-            docker load < /tmp/markethub-api.tar.gz
+            docker load < /tmp/markethub-api.img
             docker stop markethub-api || true
             docker rm markethub-api || true
             docker run -d \
@@ -55,4 +55,4 @@ jobs:
               --env-file /home/${{ secrets.VM_USER }}/.env.markethub \
               --restart unless-stopped \
               markethub-api:latest
-            rm /tmp/markethub-api.tar.gz
+            rm /tmp/markethub-api.img

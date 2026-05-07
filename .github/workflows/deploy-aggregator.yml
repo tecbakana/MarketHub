@@ -26,7 +26,7 @@ jobs:
             .
 
       - name: Export image
-        run: docker save markethub-aggregator:latest | gzip > markethub-aggregator.tar.gz
+        run: docker save markethub-aggregator:latest | gzip > markethub-aggregator.img
 
       - name: Copy image to VM
         uses: appleboy/scp-action@v0.1.7
@@ -34,7 +34,7 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          source: markethub-aggregator.tar.gz
+          source: markethub-aggregator.img
           target: /tmp/
 
       - name: Deploy on VM
@@ -43,9 +43,9 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          command_timeout: 10m
+          command_timeout: 20m
           script: |
-            docker load < /tmp/markethub-aggregator.tar.gz
+            docker load < /tmp/markethub-aggregator.img
             docker stop markethub-aggregator || true
             docker rm markethub-aggregator || true
             docker run -d \
@@ -55,4 +55,4 @@ jobs:
               --env-file /home/${{ secrets.VM_USER }}/.env.markethub \
               --restart unless-stopped \
               markethub-aggregator:latest
-            rm /tmp/markethub-aggregator.tar.gz
+            rm /tmp/markethub-aggregator.img
