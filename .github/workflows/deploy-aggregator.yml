@@ -1,0 +1,57 @@
+name: Deploy markethub-aggregator
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/aggregator/**'
+      - 'services/connector-mercadolivre/**'
+      - 'services/emitter-spedy/**'
+      - 'packages/core/**'
+      - '.github/workflows/deploy-aggregator.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: |
+          docker build \
+            -f services/aggregator/Dockerfile \
+            -t markethub-aggregator:latest \
+            .
+
+      - name: Export image
+        run: docker save markethub-aggregator:latest | gzip > markethub-aggregator.tar.gz
+
+      - name: Copy image to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: markethub-aggregator.tar.gz
+          target: /tmp/
+
+      - name: Deploy on VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            docker load < /tmp/markethub-aggregator.tar.gz
+            docker stop markethub-aggregator || true
+            docker rm markethub-aggregator || true
+            docker run -d \
+              --name markethub-aggregator \
+              --network markethub_default \
+              --network-alias aggregator \
+              --env-file /home/${{ secrets.VM_USER }}/.env.markethub \
+              --restart unless-stopped \
+              markethub-aggregator:latest
+            rm /tmp/markethub-aggregator.tar.gz

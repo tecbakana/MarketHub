@@ -6,6 +6,7 @@ import { SpedyEmissor } from '@markethub/emitter-spedy';
 
 const router: Router = Router();
 
+//autenticador
 router.use(autenticar);
 
 router.get('/', async (req: Request, res: Response): Promise<void> => {
