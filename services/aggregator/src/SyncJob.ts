@@ -22,7 +22,13 @@ export class SyncJob {
     if (this.intervalId) clearInterval(this.intervalId);
   }
 
-  private async refreshMlToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  private async refreshMlToken(refreshToken: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    accessTokenExpiresAt: Date;
+    refreshTokenExpiresAt: Date;
+  }> {
+    const now = new Date();
     const res = await axios.post('https://api.mercadolibre.com/oauth/token', null, {
       params: {
         grant_type: 'refresh_token',
@@ -31,7 +37,13 @@ export class SyncJob {
         refresh_token: refreshToken,
       },
     });
-    return { accessToken: res.data.access_token, refreshToken: res.data.refresh_token };
+    const expiresIn: number = res.data.expires_in ?? 21600;
+    return {
+      accessToken: res.data.access_token,
+      refreshToken: res.data.refresh_token,
+      accessTokenExpiresAt: new Date(now.getTime() + expiresIn * 1000),
+      refreshTokenExpiresAt: new Date(now.getTime() + 15552000 * 1000),
+    };
   }
 
   private async obterTokenAsync(apiUrl: string, tenantId: string): Promise<string> {
@@ -71,9 +83,11 @@ export class SyncJob {
             accessToken,
             refreshToken,
             sellerId: c.sellerId,
+            accessTokenExpiresAt: renovado.accessTokenExpiresAt,
+            refreshTokenExpiresAt: renovado.refreshTokenExpiresAt,
           }, { headers: { Authorization: `Bearer ${API_TOKEN}` } });
 
-          console.log(`[SyncJob] [${tenantId}] Token ML renovado`);
+          console.log(`[SyncJob] [${tenantId}] Token ML renovado — expira em ${renovado.accessTokenExpiresAt.toISOString()}`);
         } catch {
           console.warn(`[SyncJob] [${tenantId}] Falha ao renovar token ML — usando token atual`);
         }

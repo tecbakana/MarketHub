@@ -6,6 +6,7 @@ import pedidosRoutes from './routes/pedidos';
 import configuracoesRoutes from './routes/configuracoes';
 import webhooksRoutes from './routes/webhooks';
 import adminRoutes from './routes/admin';
+import mlAuthRoutes from './routes/ml-auth';
 
 config({ path: '../../.env' });
 
@@ -19,6 +20,7 @@ app.use('/pedidos', pedidosRoutes);
 app.use('/configuracoes', configuracoesRoutes);
 app.use('/webhooks', webhooksRoutes);
 app.use('/admin', adminRoutes);
+app.use('/admin/ml', mlAuthRoutes);
 
 app.get('/health', (_, res) => res.json({ status: 'ok' }));
 

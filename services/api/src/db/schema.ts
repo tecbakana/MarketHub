@@ -31,6 +31,10 @@ export async function inicializarDb(): Promise<void> {
       access_token TEXT NOT NULL,
       refresh_token TEXT,
       seller_id TEXT,
+      access_token_expires_at TIMESTAMPTZ,
+      refresh_token_expires_at TIMESTAMPTZ,
+      auth_code TEXT,
+      auth_code_expires_at TIMESTAMPTZ,
       PRIMARY KEY (tenant_id, marketplace)
     );
 
@@ -45,5 +49,12 @@ export async function inicializarDb(): Promise<void> {
       chave_nf TEXT,
       payload TEXT NOT NULL
     );
+  `);
+
+  await getPool().query(`
+    ALTER TABLE credenciais ADD COLUMN IF NOT EXISTS access_token_expires_at TIMESTAMPTZ;
+    ALTER TABLE credenciais ADD COLUMN IF NOT EXISTS refresh_token_expires_at TIMESTAMPTZ;
+    ALTER TABLE credenciais ADD COLUMN IF NOT EXISTS auth_code TEXT;
+    ALTER TABLE credenciais ADD COLUMN IF NOT EXISTS auth_code_expires_at TIMESTAMPTZ;
   `);
 }
