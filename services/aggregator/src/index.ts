@@ -3,6 +3,7 @@ config({ path: '../../.env' });
 import { resolve } from 'path';
 console.log('Caminho .env:', resolve('../../.env'));
 
+//import de arquivos
 import { MarketplaceAggregator } from './MarketplaceAggregator';
 import { MessagePublisher } from './MessagePublisher';
 import { SyncJob } from './SyncJob';

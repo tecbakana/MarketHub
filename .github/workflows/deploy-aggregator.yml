@@ -1,8 +1,7 @@
 name: Deploy markethub-aggregator
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
     paths:
       - 'services/aggregator/**'
       - 'services/connector-mercadolivre/**'
