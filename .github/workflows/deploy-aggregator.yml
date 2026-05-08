@@ -1,13 +1,15 @@
 name: Deploy markethub-aggregator
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
     paths:
       - 'services/aggregator/**'
       - 'services/connector-mercadolivre/**'
       - 'services/emitter-spedy/**'
       - 'packages/core/**'
       - '.github/workflows/deploy-aggregator.yml'
+  workflow_dispatch:
 
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/markethub-aggregator
@@ -45,9 +47,11 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           command_timeout: 10m
+          envs: GITHUB_TOKEN,GITHUB_ACTOR,IMAGE
           script: |
-            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ${{ env.IMAGE }}:latest
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+            docker network create markethub_default 2>/dev/null || true
+            docker pull $IMAGE:latest
             docker stop markethub-aggregator || true
             docker rm markethub-aggregator || true
             docker run -d \
@@ -56,4 +60,4 @@ jobs:
               --network-alias aggregator \
               --env-file /home/${{ secrets.VM_USER }}/.env.markethub \
               --restart unless-stopped \
-              ${{ env.IMAGE }}:latest
+              $IMAGE:latest
