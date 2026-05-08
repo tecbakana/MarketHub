@@ -18,6 +18,7 @@ export class SyncJob {
     this.intervalId = setInterval(() => this.executarAsync(), this.intervalMinutes * 60 * 1000);
   }
 
+  //teste
   parar(): void {
     if (this.intervalId) clearInterval(this.intervalId);
   }
@@ -69,7 +70,12 @@ export class SyncJob {
 
     const credenciais = new Map<string, CredencialMarketplace>();
 
-    for (const c of response.data as { marketplace: string; accessToken: string; refreshToken: string; sellerId: string }[]) {
+    for (const c of response.data as {
+      marketplace: string;
+      accessToken: string;
+      refreshToken: string;
+      sellerId: string;
+    }[]) {
       let { accessToken, refreshToken } = c;
 
       if (c.marketplace === 'mercadolivre' && refreshToken) {
@@ -78,16 +84,22 @@ export class SyncJob {
           accessToken = renovado.accessToken;
           refreshToken = renovado.refreshToken;
 
-          await axios.post(`${apiUrl}/configuracoes`, {
-            marketplace: c.marketplace,
-            accessToken,
-            refreshToken,
-            sellerId: c.sellerId,
-            accessTokenExpiresAt: renovado.accessTokenExpiresAt,
-            refreshTokenExpiresAt: renovado.refreshTokenExpiresAt,
-          }, { headers: { Authorization: `Bearer ${API_TOKEN}` } });
+          await axios.post(
+            `${apiUrl}/configuracoes`,
+            {
+              marketplace: c.marketplace,
+              accessToken,
+              refreshToken,
+              sellerId: c.sellerId,
+              accessTokenExpiresAt: renovado.accessTokenExpiresAt,
+              refreshTokenExpiresAt: renovado.refreshTokenExpiresAt,
+            },
+            { headers: { Authorization: `Bearer ${API_TOKEN}` } },
+          );
 
-          console.log(`[SyncJob] [${tenantId}] Token ML renovado — expira em ${renovado.accessTokenExpiresAt.toISOString()}`);
+          console.log(
+            `[SyncJob] [${tenantId}] Token ML renovado — expira em ${renovado.accessTokenExpiresAt.toISOString()}`,
+          );
         } catch {
           console.warn(`[SyncJob] [${tenantId}] Falha ao renovar token ML — usando token atual`);
         }
