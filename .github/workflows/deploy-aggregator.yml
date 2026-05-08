@@ -42,14 +42,18 @@ jobs:
 
       - name: Deploy na VM
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_ACTOR: ${{ github.actor }}
+          IMAGE: ${{ env.IMAGE }}
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           command_timeout: 10m
-          envs: GITHUB_TOKEN,GITHUB_ACTOR,IMAGE
+          envs: GHCR_TOKEN,GHCR_ACTOR,IMAGE
           script: |
-            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
             docker network create markethub_default 2>/dev/null || true
             docker pull $IMAGE:latest
             docker stop markethub-aggregator || true
