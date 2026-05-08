@@ -44,11 +44,11 @@ jobs:
             if [ "${{ needs.changes.outputs.api }}" == "true" ]; then
               echo ">>> Rebuilding api..."
               docker compose build api
-              docker compose up -d api
+              docker compose up -d --force-recreate api
             fi
 
             if [ "${{ needs.changes.outputs.aggregator }}" == "true" ]; then
               echo ">>> Rebuilding aggregator..."
               docker compose build aggregator
-              docker compose up -d aggregator
+              docker compose up -d --force-recreate aggregator
             fi
